@@ -1,3 +1,4 @@
+```groovy
 pipeline {
 
     agent any
@@ -44,25 +45,38 @@ pipeline {
 
                     echo "System:"
                     uname -m
+
+                    echo "Operating System:"
+                    uname -a
+                '''
+            }
+        }
+
+        stage('Frontend Dependencies') {
+            steps {
+                echo 'Installing frontend dependencies...'
+
+                sh '''
+                    rm -rf node_modules
+
+                    npm install --include=dev --include=optional
+
+                    echo "Frontend dependencies installed successfully."
+
+                    echo "Rollup packages:"
+                    ls -lah node_modules/rollup 2>/dev/null || true
+
+                    echo "Rollup native bindings:"
+                    find node_modules/@rollup -maxdepth 2 -type d 2>/dev/null || true
                 '''
             }
         }
 
         stage('Frontend Lint') {
             steps {
-                echo 'Installing frontend dependencies and running lint...'
+                echo 'Running frontend lint...'
 
                 sh '''
-                    rm -rf node_modules
-
-                    npm ci --include=dev --include=optional
-
-                    npm install --no-save @oxlint/binding-linux-x64-gnu@1.75.0
-
-                    echo "Oxlint packages:"
-                    ls -lah node_modules/@oxlint/
-
-                    echo "Running Oxlint:"
                     npm run lint
                 '''
             }
@@ -115,18 +129,30 @@ pipeline {
                 sh '''
                     sleep 5
 
-                    echo "Container status:"
+                    echo "================================="
+                    echo "Container Status"
+                    echo "================================="
+
                     docker compose ps
 
-                    echo "Backend health:"
+                    echo ""
+                    echo "================================="
+                    echo "Backend Health"
+                    echo "================================="
+
                     curl --fail http://localhost:8000/health
 
                     echo ""
-                    echo "Frontend health:"
+                    echo "================================="
+                    echo "Frontend Health"
+                    echo "================================="
+
                     curl --fail http://localhost:5173
 
                     echo ""
+                    echo "================================="
                     echo "Health checks passed."
+                    echo "================================="
                 '''
             }
         }
@@ -136,29 +162,38 @@ pipeline {
 
         success {
             echo '''
-NEXORA CI/CD SUCCESS
+========================================
+       NEXORA CI/CD SUCCESS
+========================================
 
 Frontend: http://localhost:5173
-Backend: http://localhost:8000
-MinIO: http://localhost:9001
+Backend:  http://localhost:8000
+MinIO:    http://localhost:9001
 
 Pipeline completed successfully.
+========================================
 '''
         }
 
         failure {
             echo '''
-NEXORA CI/CD FAILED
+========================================
+       NEXORA CI/CD FAILED
+========================================
 
 Collecting container logs...
+========================================
 '''
 
             sh '''
+                echo "Container status:"
                 docker compose ps || true
 
+                echo ""
                 echo "Backend logs:"
                 docker compose logs --tail=50 backend || true
 
+                echo ""
                 echo "Frontend logs:"
                 docker compose logs --tail=50 frontend || true
             '''
@@ -169,3 +204,4 @@ Collecting container logs...
         }
     }
 }
+```
