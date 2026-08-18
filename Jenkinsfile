@@ -16,7 +16,41 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo 'Checking out NEXORA source code...'
+
                 checkout scm
+            }
+        }
+
+        stage('Environment Check') {
+            steps {
+                echo 'Checking Jenkins Node/npm environment...'
+
+                sh '''
+                    echo "Node version:"
+                    node -v
+
+                    echo "NPM version:"
+                    npm -v
+
+                    echo "System:"
+                    uname -a
+                    uname -m
+
+                    echo "NPM omit config:"
+                    npm config get omit
+
+                    echo "NPM include config:"
+                    npm config get include
+
+                    echo "Oxlint:"
+                    npm ls oxlint || true
+
+                    echo "Oxlint bindings:"
+                    ls -lah node_modules/@oxlint/ || true
+
+                    echo "Linux Oxlint binding:"
+                    ls -lah node_modules/@oxlint/binding-linux-x64-gnu/ || true
+                '''
             }
         }
 
@@ -26,6 +60,10 @@ pipeline {
 
                 sh '''
                     npm ci --include=dev --include=optional
+
+                    echo "Checking Oxlint native binding:"
+                    ls -lah node_modules/@oxlint/ || true
+
                     npm run lint
                 '''
             }
@@ -33,7 +71,7 @@ pipeline {
 
         stage('Frontend Build') {
             steps {
-                echo 'Building frontend...'
+                echo 'Building NEXORA frontend...'
 
                 sh '''
                     npm run build
@@ -78,14 +116,18 @@ pipeline {
                 sh '''
                     sleep 5
 
-                    echo "Checking containers..."
+                    echo "Container status:"
                     docker compose ps
 
-                    echo "Checking backend health..."
+                    echo "Backend health:"
                     curl --fail http://localhost:8000/health
 
-                    echo "Checking frontend..."
+                    echo ""
+                    echo "Frontend health:"
                     curl --fail http://localhost:5173
+
+                    echo ""
+                    echo "Health checks passed."
                 '''
             }
         }
@@ -95,28 +137,36 @@ pipeline {
 
         success {
             echo '''
-            ========================================
-            NEXORA CI/CD SUCCESS
-            ========================================
-            Frontend : http://localhost:5173
-            Backend  : http://localhost:8000
-            MinIO    : http://localhost:9001
-            ========================================
-            '''
+NEXORA CI/CD SUCCESS
+
+Frontend: http://localhost:5173
+Backend:  http://localhost:8000
+MinIO:    http://localhost:9001
+
+Pipeline completed successfully.
+'''
         }
 
         failure {
-            echo 'NEXORA CI/CD FAILED'
+            echo '''
+NEXORA CI/CD FAILED
+
+Collecting container logs...
+'''
 
             sh '''
                 docker compose ps || true
+
+                echo "Backend logs:"
                 docker compose logs --tail=50 backend || true
+
+                echo "Frontend logs:"
                 docker compose logs --tail=50 frontend || true
             '''
         }
 
         always {
-            echo 'NEXORA pipeline completed.'
+            echo 'NEXORA Jenkins pipeline completed.'
         }
     }
 }
