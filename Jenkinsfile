@@ -23,7 +23,7 @@ pipeline {
 
         stage('Environment Check') {
             steps {
-                echo 'Checking Jenkins Node/npm environment...'
+                echo 'Checking Jenkins environment...'
 
                 sh '''
                     echo "Node version:"
@@ -36,20 +36,11 @@ pipeline {
                     uname -a
                     uname -m
 
-                    echo "NPM omit config:"
-                    npm config get omit
-
-                    echo "NPM include config:"
-                    npm config get include
-
-                    echo "Oxlint:"
+                    echo "Oxlint version:"
                     npm ls oxlint || true
 
-                    echo "Oxlint bindings:"
+                    echo "Oxlint packages:"
                     ls -lah node_modules/@oxlint/ || true
-
-                    echo "Linux Oxlint binding:"
-                    ls -lah node_modules/@oxlint/binding-linux-x64-gnu/ || true
                 '''
             }
         }
@@ -59,11 +50,16 @@ pipeline {
                 echo 'Installing frontend dependencies and running lint...'
 
                 sh '''
+                    rm -rf node_modules
+
                     npm ci --include=dev --include=optional
 
-                    echo "Checking Oxlint native binding:"
-                    ls -lah node_modules/@oxlint/ || true
+                    npm install --no-save @oxlint/binding-linux-x64-gnu@1.75.0
 
+                    echo "Oxlint packages:"
+                    ls -lah node_modules/@oxlint/
+
+                    echo "Running Oxlint:"
                     npm run lint
                 '''
             }
@@ -140,8 +136,8 @@ pipeline {
 NEXORA CI/CD SUCCESS
 
 Frontend: http://localhost:5173
-Backend:  http://localhost:8000
-MinIO:    http://localhost:9001
+Backend: http://localhost:8000
+MinIO: http://localhost:9001
 
 Pipeline completed successfully.
 '''
