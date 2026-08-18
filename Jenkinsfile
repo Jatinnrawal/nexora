@@ -49,18 +49,20 @@ pipeline {
 
         stage('Frontend Dependencies') {
             steps {
-                echo 'Installing frontend dependencies...'
+                echo 'Installing frontend dependencies for Jenkins Linux environment...'
+
                 sh '''
-                    rm -rf node_modules
+                    rm -rf node_modules package-lock.json
+
                     npm install --include=dev --include=optional
 
                     echo "Frontend dependencies installed successfully."
 
-                    echo "Rollup packages:"
-                    ls -lah node_modules/rollup 2>/dev/null || true
+                    echo "Checking Oxlint Linux binding:"
+                    ls -lah node_modules/@oxlint/ 2>/dev/null || true
 
-                    echo "Rollup native bindings:"
-                    find node_modules/@rollup -maxdepth 2 -type d 2>/dev/null || true
+                    echo "Checking Rollup Linux binding:"
+                    ls -lah node_modules/@rollup/ 2>/dev/null || true
                 '''
             }
         }
@@ -68,6 +70,7 @@ pipeline {
         stage('Frontend Lint') {
             steps {
                 echo 'Running frontend lint...'
+
                 sh '''
                     npm run lint
                 '''
@@ -77,6 +80,7 @@ pipeline {
         stage('Frontend Build') {
             steps {
                 echo 'Building NEXORA frontend...'
+
                 sh '''
                     npm run build
                 '''
@@ -86,6 +90,7 @@ pipeline {
         stage('Validate Docker Compose') {
             steps {
                 echo 'Validating Docker Compose configuration...'
+
                 sh '''
                     docker compose config -q
                 '''
@@ -95,6 +100,7 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 echo 'Building NEXORA Docker images...'
+
                 sh '''
                     docker compose build
                 '''
@@ -104,6 +110,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying NEXORA...'
+
                 sh '''
                     docker compose up -d
                 '''
@@ -113,6 +120,7 @@ pipeline {
         stage('Health Check') {
             steps {
                 echo 'Checking NEXORA services...'
+
                 sh '''
                     sleep 5
 
