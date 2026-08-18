@@ -22,10 +22,10 @@ pipeline {
 
         stage('Frontend Lint') {
             steps {
-                echo 'Running frontend lint...'
+                echo 'Installing frontend dependencies and running lint...'
 
                 sh '''
-                    npm ci --include=optional
+                    npm ci --include=dev --include=optional
                     npm run lint
                 '''
             }
