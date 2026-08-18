@@ -25,6 +25,7 @@ pipeline {
         stage('Environment Check') {
             steps {
                 echo 'Checking Jenkins environment...'
+
                 sh '''
                     echo "Node version:"
                     node -v
@@ -48,34 +49,34 @@ pipeline {
         }
 
         stage('Frontend Dependencies') {
-    steps {
-        echo 'Installing frontend dependencies...'
+            steps {
+                echo 'Installing frontend dependencies...'
 
-        sh '''
-            rm -rf node_modules package-lock.json
+                sh '''
+                    rm -rf node_modules package-lock.json
 
-            npm install --include=dev --include=optional
+                    npm install --include=dev --include=optional
 
-            echo "Installing Linux native bindings..."
+                    echo "Installing Linux native bindings..."
 
-            npm install --no-save @oxlint/binding-linux-x64-gnu@1.75.0
+                    npm install --no-save @oxlint/binding-linux-x64-gnu@1.78.0
 
-            ROLLUP_VERSION=$(node -p "require('./node_modules/rollup/package.json').version")
+                    ROLLDOWN_VERSION=$(node -p "require('rolldown/package.json').version")
 
-            echo "Detected Rollup version: $ROLLUP_VERSION"
+                    echo "Detected Rolldown version: $ROLLDOWN_VERSION"
 
-            npm install --no-save @rollup/rollup-linux-x64-gnu@$ROLLUP_VERSION
+                    npm install --no-save @rolldown/binding-linux-x64-gnu@$ROLLDOWN_VERSION
 
-            echo "Checking Oxlint:"
-            ls -lah node_modules/@oxlint/
+                    echo "Checking Oxlint:"
+                    ls -lah node_modules/@oxlint/ 2>/dev/null || true
 
-            echo "Checking Rollup:"
-            ls -lah node_modules/@rollup/
+                    echo "Checking Rolldown:"
+                    ls -lah node_modules/@rolldown/ 2>/dev/null || true
 
-            echo "Dependencies ready."
-        '''
-    }
-}
+                    echo "Dependencies ready."
+                '''
+            }
+        }
 
         stage('Frontend Lint') {
             steps {
