@@ -48,24 +48,24 @@ pipeline {
         }
 
         stage('Frontend Dependencies') {
-            steps {
-                echo 'Installing frontend dependencies for Jenkins Linux environment...'
+    steps {
+        echo 'Installing frontend dependencies...'
 
-                sh '''
-                    rm -rf node_modules package-lock.json
+        sh '''
+            rm -rf node_modules package-lock.json
 
-                    npm install --include=dev --include=optional
+            npm install --include=dev --include=optional
 
-                    echo "Frontend dependencies installed successfully."
+            npm install --no-save @oxlint/binding-linux-x64-gnu@1.75.0
 
-                    echo "Checking Oxlint Linux binding:"
-                    ls -lah node_modules/@oxlint/ 2>/dev/null || true
+            echo "Checking Oxlint Linux binding:"
+            ls -lah node_modules/@oxlint/
 
-                    echo "Checking Rollup Linux binding:"
-                    ls -lah node_modules/@rollup/ 2>/dev/null || true
-                '''
-            }
-        }
+            echo "Checking Rollup:"
+            ls -lah node_modules/@rollup/ 2>/dev/null || true
+        '''
+    }
+}
 
         stage('Frontend Lint') {
             steps {
