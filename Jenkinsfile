@@ -1,6 +1,4 @@
-```groovy
 pipeline {
-
     agent any
 
     tools {
@@ -17,11 +15,9 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 echo 'Checking out NEXORA source code...'
-
                 checkout scm
             }
         }
@@ -29,7 +25,6 @@ pipeline {
         stage('Environment Check') {
             steps {
                 echo 'Checking Jenkins environment...'
-
                 sh '''
                     echo "Node version:"
                     node -v
@@ -55,10 +50,8 @@ pipeline {
         stage('Frontend Dependencies') {
             steps {
                 echo 'Installing frontend dependencies...'
-
                 sh '''
                     rm -rf node_modules
-
                     npm install --include=dev --include=optional
 
                     echo "Frontend dependencies installed successfully."
@@ -75,7 +68,6 @@ pipeline {
         stage('Frontend Lint') {
             steps {
                 echo 'Running frontend lint...'
-
                 sh '''
                     npm run lint
                 '''
@@ -85,7 +77,6 @@ pipeline {
         stage('Frontend Build') {
             steps {
                 echo 'Building NEXORA frontend...'
-
                 sh '''
                     npm run build
                 '''
@@ -95,7 +86,6 @@ pipeline {
         stage('Validate Docker Compose') {
             steps {
                 echo 'Validating Docker Compose configuration...'
-
                 sh '''
                     docker compose config -q
                 '''
@@ -105,7 +95,6 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 echo 'Building NEXORA Docker images...'
-
                 sh '''
                     docker compose build
                 '''
@@ -115,7 +104,6 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying NEXORA...'
-
                 sh '''
                     docker compose up -d
                 '''
@@ -125,64 +113,45 @@ pipeline {
         stage('Health Check') {
             steps {
                 echo 'Checking NEXORA services...'
-
                 sh '''
                     sleep 5
 
-                    echo "================================="
                     echo "Container Status"
-                    echo "================================="
-
                     docker compose ps
 
                     echo ""
-                    echo "================================="
                     echo "Backend Health"
-                    echo "================================="
-
                     curl --fail http://localhost:8000/health
 
                     echo ""
-                    echo "================================="
                     echo "Frontend Health"
-                    echo "================================="
-
                     curl --fail http://localhost:5173
 
                     echo ""
-                    echo "================================="
                     echo "Health checks passed."
-                    echo "================================="
                 '''
             }
         }
     }
 
     post {
-
         success {
             echo '''
-========================================
-       NEXORA CI/CD SUCCESS
-========================================
+NEXORA CI/CD SUCCESS
 
 Frontend: http://localhost:5173
-Backend:  http://localhost:8000
-MinIO:    http://localhost:9001
+Backend: http://localhost:8000
+MinIO: http://localhost:9001
 
 Pipeline completed successfully.
-========================================
 '''
         }
 
         failure {
             echo '''
-========================================
-       NEXORA CI/CD FAILED
-========================================
+NEXORA CI/CD FAILED
 
 Collecting container logs...
-========================================
 '''
 
             sh '''
@@ -204,4 +173,3 @@ Collecting container logs...
         }
     }
 }
-```
