@@ -1,36 +1,67 @@
 pipeline {
 
+    agent any
 
-    agent any 
-
- 
     environment {
         COMPOSE_PROJECT_NAME = "nexora"
     }
 
+    options {
+        timestamps()
+        timeout(time: 15, unit: 'MINUTES')
+    }
 
     stages {
-  
-       
-        stage('checkout') {
-            steps {
-                echo 'checking out NEXORA source code...' 
 
+        stage('Checkout') {
+            steps {
+                echo 'Checking out NEXORA source code...'
                 checkout scm
+            }
+        }
+
+        stage('Frontend Lint') {
+            steps {
+                echo 'Running frontend lint...'
+
+                sh '''
+                    npm ci
+                    npm run lint
+                '''
+            }
+        }
+
+        stage('Frontend Build') {
+            steps {
+                echo 'Building frontend...'
+
+                sh '''
+                    npm run build
+                '''
             }
         }
 
         stage('Validate Docker Compose') {
             steps {
-                 echo 'validating docker-compose.yml...'
+                echo 'Validating Docker Compose configuration...'
 
-                 sh '''
-                     docker compose config -q
-                 '''
+                sh '''
+                    docker compose config -q
+                '''
             }
         }
 
         stage('Build Docker Images') {
+            steps {
+                echo 'Building NEXORA Docker images...'
+
+                sh '''
+                    docker compose build
+                '''
+            }
+        }
+
+        stage('Deploy') {
             steps {
                 echo 'Deploying NEXORA...'
 
@@ -40,42 +71,52 @@ pipeline {
             }
         }
 
-        stage('Verify Deployment') {
+        stage('Health Check') {
             steps {
-                echo 'Checking NEXORA containers...'
+                echo 'Checking NEXORA services...'
 
                 sh '''
                     sleep 5
+
+                    echo "Checking containers..."
                     docker compose ps
+
+                    echo "Checking backend health..."
+                    curl --fail http://localhost:8000/health
+
+                    echo "Checking frontend..."
+                    curl --fail http://localhost:5173
                 '''
             }
         }
     }
 
     post {
-     
+
         success {
-            echo '========================================'
-            echo 'NEXORA DEPLOYMENT SUCCESSFUL'
-            echo '========================================'
-            echo 'Frontend: http://localhost:5173'
-            echo 'Backend:  http://localhost:8000'
-            echo 'MinIO:    http://localhost:9001'
+            echo '''
+            ========================================
+            NEXORA CI/CD SUCCESS
+            ========================================
+            Frontend : http://localhost:5173
+            Backend  : http://localhost:8000
+            MinIO    : http://localhost:9001
+            ========================================
+            '''
         }
 
         failure {
-            echo '========================================'
-            echo 'NEXORA PIPELINE FAILED'
-            echo '========================================'
+            echo 'NEXORA CI/CD FAILED'
 
             sh '''
                 docker compose ps || true
+                docker compose logs --tail=50 backend || true
+                docker compose logs --tail=50 frontend || true
             '''
         }
 
         always {
-            echo 'Jenkins pipeline finished.'
+            echo 'NEXORA pipeline completed.'
         }
     }
 }
-
