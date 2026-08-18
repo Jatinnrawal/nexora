@@ -25,7 +25,7 @@ pipeline {
                 echo 'Running frontend lint...'
 
                 sh '''
-                    npm ci
+                    npm ci --include=optional
                     npm run lint
                 '''
             }
