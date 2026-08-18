@@ -56,13 +56,23 @@ pipeline {
 
             npm install --include=dev --include=optional
 
+            echo "Installing Linux native bindings..."
+
             npm install --no-save @oxlint/binding-linux-x64-gnu@1.75.0
 
-            echo "Checking Oxlint Linux binding:"
+            ROLLUP_VERSION=$(node -p "require('./node_modules/rollup/package.json').version")
+
+            echo "Detected Rollup version: $ROLLUP_VERSION"
+
+            npm install --no-save @rollup/rollup-linux-x64-gnu@$ROLLUP_VERSION
+
+            echo "Checking Oxlint:"
             ls -lah node_modules/@oxlint/
 
             echo "Checking Rollup:"
-            ls -lah node_modules/@rollup/ 2>/dev/null || true
+            ls -lah node_modules/@rollup/
+
+            echo "Dependencies ready."
         '''
     }
 }
