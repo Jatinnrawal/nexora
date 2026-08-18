@@ -2,6 +2,10 @@ pipeline {
 
     agent any
 
+    tools {
+        nodejs 'NodeJS-22'
+    }
+
     environment {
         COMPOSE_PROJECT_NAME = "nexora"
     }
@@ -32,15 +36,14 @@ pipeline {
                     echo "NPM version:"
                     npm -v
 
+                    echo "Node location:"
+                    which node
+
+                    echo "NPM location:"
+                    which npm
+
                     echo "System:"
-                    uname -a
                     uname -m
-
-                    echo "Oxlint version:"
-                    npm ls oxlint || true
-
-                    echo "Oxlint packages:"
-                    ls -lah node_modules/@oxlint/ || true
                 '''
             }
         }
