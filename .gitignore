@@ -45,3 +45,4 @@ minio-data/
 
 logs/
 *.log
+minikube-linux-amd64

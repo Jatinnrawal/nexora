@@ -27,7 +27,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 
-const API_URL = "http://localhost:8000";
+const API_URL = "/api";
 
 function App() {
   const fileInputRef = useRef(null);
@@ -68,7 +68,7 @@ function App() {
   const loadFolders = async () => {
     try {
       const response = await fetch(
-        `${API_URL}/api/folders`
+        `${API_URL}/folders`
       );
 
       if (!response.ok) {
@@ -94,7 +94,7 @@ function App() {
   const loadStorage = async () => {
     try {
       const response = await fetch(
-        `${API_URL}/api/storage`
+        `${API_URL}/storage`
       );
 
       if (!response.ok) {
@@ -126,7 +126,7 @@ function App() {
           : "";
 
       const response = await fetch(
-        `${API_URL}/api/files/${folderQuery}`
+        `${API_URL}/files/${folderQuery}`
       );
 
       if (!response.ok) {
@@ -159,7 +159,7 @@ function App() {
       setError("");
 
       const response = await fetch(
-        `${API_URL}/api/trash`
+        `${API_URL}/trash`
       );
 
       if (!response.ok) {
@@ -257,7 +257,7 @@ function App() {
       setUploadProgress(30);
 
       let uploadUrl =
-        `${API_URL}/api/files/upload`;
+        `${API_URL}/files/upload`;
 
       if (currentFolder !== null) {
         uploadUrl +=
@@ -357,7 +357,7 @@ function App() {
 
       const response =
         await fetch(
-          `${API_URL}/api/files/${file.id}/download`
+          `${API_URL}/files/${file.id}/download`
         );
 
       if (!response.ok) {
@@ -426,7 +426,7 @@ function App() {
 
       const response =
         await fetch(
-          `${API_URL}/api/files/${file.id}`,
+          `${API_URL}/files/${file.id}`,
           {
             method: "DELETE",
           }
@@ -472,7 +472,7 @@ function App() {
 
       const response =
         await fetch(
-          `${API_URL}/api/files/${file.id}/restore`,
+          `${API_URL}/files/${file.id}/restore`,
           {
             method: "POST",
           }
@@ -531,7 +531,7 @@ function App() {
 
         const response =
           await fetch(
-            `${API_URL}/api/files/${file.id}/permanent`,
+            `${API_URL}/files/${file.id}/permanent`,
             {
               method: "DELETE",
             }
@@ -599,7 +599,7 @@ function App() {
 
       const response =
         await fetch(
-          `${API_URL}/api/folders?${params.toString()}`,
+          `${API_URL}/folders?${params.toString()}`,
           {
             method: "POST",
           }
@@ -669,7 +669,7 @@ function App() {
 
       const response =
         await fetch(
-          `${API_URL}/api/folders/${folder.id}?${params.toString()}`,
+          `${API_URL}/folders/${folder.id}?${params.toString()}`,
           {
             method: "PATCH",
           }
@@ -723,7 +723,7 @@ function App() {
 
       const response =
         await fetch(
-          `${API_URL}/api/folders/${folder.id}`,
+          `${API_URL}/folders/${folder.id}`,
           {
             method: "DELETE",
           }

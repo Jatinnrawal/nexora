@@ -90,6 +90,56 @@ services:
       - nexora-network
 
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: nexora-prometheus
+    restart: unless-stopped
+
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+    ports:
+      - "9090:9090"
+
+    networks:
+      - nexora-network
+
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: nexora-grafana
+    restart: unless-stopped
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - prometheus
+
+    networks:
+      - nexora-network      
+        
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: nexora-cadvisor
+    restart: unless-stopped
+
+    ports:
+      - "8081:8080"
+
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+
+    networks:
+      - nexora-network
+
+
+
 volumes:
   postgres_data:
   minio_data:
